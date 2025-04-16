@@ -1,6 +1,6 @@
 ---
 title: "Project 1"
-subtitle: "Top 5 Authors and thier Top 5 books"
+subtitle: "Best Selling Books by 5 Leading Authors"
 output: html_notebook
 data: 04-18-2025
 author: Aby Joe Jose & Meenakshy Manju
