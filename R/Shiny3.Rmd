@@ -1,0 +1,197 @@
+---
+title: "Shiny - Script 3"
+output: html_notebook
+---
+
+## Layouts
+
+Single Page Layout
+
+```{r}
+library(shiny)
+
+ui <- fluidPage(
+  titlePanel("Central limit theorem"),
+  sidebarLayout(
+    sidebarPanel(
+      numericInput("m", "Number of samples:", 2, min = 1, max = 100)
+    ),
+    mainPanel(
+      plotOutput("hist")
+    )
+  )
+)
+server <- function(input, output, session) {
+  output$hist <- renderPlot({
+    means <- replicate(1e4, mean(runif(input$m)))
+    hist(means, breaks = 20)
+  }, res = 96)
+}
+
+
+shinyApp(ui, server)
+
+```
+
+
+
+
+Multi-page layout
+
+```{r}
+ui <- fluidPage(
+  tabsetPanel(
+    tabPanel("Import data", 
+      fileInput("file", "Data", buttonLabel = "Upload..."),
+      textInput("delim", "Delimiter (leave blank to guess)", ""),
+      numericInput("skip", "Rows to skip", 0, min = 0),
+      numericInput("rows", "Rows to preview", 10, min = 1)
+    ),
+    tabPanel("Set parameters"),
+    tabPanel("Visualise results")
+  )
+)
+ui
+```
+
+
+```{r}
+ui <- fluidPage(
+  navlistPanel(
+    id = "tabset",
+    "Heading 1",
+    tabPanel("panel 1", "Panel one contents"),
+    "Heading 2",
+    tabPanel("panel 2", "Panel two contents"),
+    tabPanel("panel 3", "Panel three contents")
+  )
+)
+
+ui
+```
+
+```{r}
+ui <- navbarPage(
+  "Page title",   
+  tabPanel("panel 1", "one"),
+  tabPanel("panel 2", "two"),
+  tabPanel("panel 3", "three"),
+  navbarMenu("subpanels", 
+    tabPanel("panel 4a", "four-a"),
+    tabPanel("panel 4b", "four-b"),
+    tabPanel("panel 4c", "four-c")
+  )
+)
+
+ui
+```
+
+
+
+
+```{r}
+ui <- fluidPage(
+  theme = bslib::bs_theme(bootswatch = "darkly"),
+  sidebarLayout(
+    sidebarPanel(
+      textInput("txt", "Text input:", "text here"),
+      sliderInput("slider", "Slider input:", 1, 100, 30)
+    ),
+    mainPanel(
+      h1(paste0("Theme: darkly")),
+      h2("Header 2"),
+      p("Some text")
+    )
+  )
+)
+server <- function(input, output, session) {
+}
+
+shinyApp(ui, server)
+
+```
+
+
+
+
+
+## Graphics
+
+Basics
+```{r}
+ui <- fluidPage(
+  plotOutput("plot", click = "plot_click"),
+  verbatimTextOutput("info")
+)
+
+server <- function(input, output) {
+  output$plot <- renderPlot({
+    plot(mtcars$wt, mtcars$mpg)
+  }, res = 96)
+
+  output$info <- renderPrint({
+    req(input$plot_click)
+    x <- round(input$plot_click$x, 2)
+    y <- round(input$plot_click$y, 2)
+    cat("[", x, ", ", y, "]", sep = "")
+  })
+}
+
+shinyApp(ui, server)
+
+```
+
+
+Clicks
+```{r}
+library(ggplot2)
+library(shiny)
+
+ui <- fluidPage(
+  plotOutput("plot", click = "plot_click"),
+  tableOutput("data")
+)
+server <- function(input, output, session) {
+  output$plot <- renderPlot({
+    ggplot(mtcars, aes(wt, mpg)) + geom_point()
+  }, res = 96)
+  
+  output$data <- renderTable({
+    req(input$plot_click)
+    nearPoints(mtcars, input$plot_click)
+  })
+}
+
+shinyApp(ui, server)
+```
+
+
+Brush
+
+```{r}
+ui <- fluidPage(
+  plotOutput("plot", brush = "plot_brush"),
+  tableOutput("data")
+)
+server <- function(input, output, session) {
+  output$plot <- renderPlot({
+    ggplot(mtcars, aes(wt, mpg)) + geom_point()
+  }, res = 96)
+  
+  output$data <- renderTable({
+    brushedPoints(mtcars, input$plot_brush)
+  })
+}
+shinyApp(ui, server)
+
+```
+
+
+
+
+
+
+
+
+
+
